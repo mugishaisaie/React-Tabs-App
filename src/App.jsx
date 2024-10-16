@@ -1,44 +1,114 @@
-import { useEffect, useState } from "react";
-import JobInfo from "./JobInfo";
-import BtnContainer from "./BtnContainer";
+import { useState } from "react";
 
-const url = 'https://www.course-api.com/react-tabs-project';
+const content = [
+  {
+    summary: "React is a library for building UIs",
+    details:
+      "Dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    summary: "State management is like giving state a home",
+    details:
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+  },
+  {
+    summary: "We can think of props as the component API",
+    details:
+      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+  },
+];
 
-const App = () => {
-
-  const[isLoading, setIsLoading]= useState(true)
-  const[jobs, setJobs]= useState([]);
-  const [currentItem, setCurrentItem]= useState(0);
-  // console.log(currentItem)
-
-  const FetchJobs =async()=>{
-    const resp = await fetch(url);
-    const newJobs = await resp.json();
-    setJobs(newJobs);
-    setIsLoading(false);
-  }
-
-  useEffect(()=>{
-    FetchJobs();
-
-  },[]);
-  
-  if(isLoading){
-    return <section className="jobs-center">
-      <div className="loading">
-      </div>
-    </section>
-  }
-  
-    return <>
-    <h2 className="title">Jobs Access App</h2>
-  <section className="jobs-center">
-    
-  {/* button container */}
-  <BtnContainer jobs={jobs} currentItem={currentItem} setCurrentItem={setCurrentItem} />
-  {/* job info */}
- <JobInfo jobs={jobs} currentItem={currentItem} />
-</section>
-    </>
+export default function App() {
+  return (
+    <div>
+      <Tabbed content={content} />
+    </div>
+  );
 }
-export default App;
+
+function Tabbed({ content }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <div>
+      <div className="tabs">
+        <Tab num={0} activeTab={activeTab} onClick={setActiveTab} />
+        <Tab num={1} activeTab={activeTab} onClick={setActiveTab} />
+        <Tab num={2} activeTab={activeTab} onClick={setActiveTab} />
+        <Tab num={3} activeTab={activeTab} onClick={setActiveTab} />
+      </div>
+
+      {activeTab <= 2 ? (
+        <TabContent item={content.at(activeTab)} key={content[activeTab].summary} />
+      ) : (
+        <DifferentContent />
+      )}
+    </div>
+  );
+}
+
+function Tab({ num, activeTab, onClick }) {
+  return (
+    <button
+      className={activeTab === num ? "tab active" : "tab"}
+      onClick={() => onClick(num)}
+    >
+      Tab {num + 1}
+    </button>
+  );
+}
+
+
+
+
+function TabContent({ item }) {
+  const [showDetails, setShowDetails] = useState(true);
+  const [likes, setLikes] = useState(0);
+
+  function handleInc() {
+    setLikes(likes=>likes + 1);
+  }
+  function handleTrippleInc() {
+    setLikes(likes=>likes + 3);
+  }
+
+  function handleUnDo(){
+    setShowDetails(true);
+    setLikes(0)
+  }
+  function handleUndoIn2s(){
+    setTimeout(handleUnDo, 2000);
+  }
+
+  return (
+    <div className="tab-content">
+      <h4>{item.summary}</h4>
+      {showDetails && <p>{item.details}</p>}
+
+      <div className="tab-actions">
+        <button onClick={() => setShowDetails((h) => !h)}>
+          {showDetails ? "Hide" : "Show"} details
+        </button>
+
+        <div className="hearts-counter">
+          <span>{likes} ❤️</span>
+          <button onClick={handleInc}>+</button>
+          <button onClick={handleTrippleInc}>+++</button>
+        </div>
+      </div>
+
+      <div className="tab-undo">
+        <button onClick={handleUnDo}>Undo</button>
+        <button onClick={handleUndoIn2s}>Undo in 2s</button>
+      </div>
+    </div>
+  );
+}
+
+function DifferentContent() {
+  return (
+    <div className="tab-content">
+      <h4>I'm a DIFFERENT tab, so I reset state 💣💥</h4>
+    </div>
+  );
+}
